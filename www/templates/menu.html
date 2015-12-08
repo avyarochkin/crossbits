@@ -1,0 +1,9 @@
+<ion-view title="Menu">
+    <ion-content scroll="false" class="center-child">
+        <ion-list id="mainmenu">
+            <ion-item ui-sref="create">CREATE</ion-item>
+            <ion-item ui-sref="load"
+                    ng-if="savedBoards.length">LOAD</ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

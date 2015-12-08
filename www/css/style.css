@@ -1,0 +1,158 @@
+/* Empty. Add your own CSS if you like */
+
+.scroll {
+}
+.pane {
+    background-color: #666;
+}
+.row-center-content {
+    text-align: center;
+}
+.padding {
+    padding: 40px;
+}
+.range {
+    background: none;
+    border: none;
+}
+.range input::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 25%;
+}
+.range input::-webkit-slider-thumb:before {
+    top: 8px;
+    height: 5px;
+}
+ion-footer-bar {
+    opacity: 0.5;
+}
+#mainmenu .item, #mainmenu .item-content {
+    background: none;
+    border: none;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    color: #999;
+    font-size: x-large;
+    cursor: pointer;
+}
+#boardscroll {
+    width: 100%;
+    height: 100%;
+}
+#board {
+    /*position: absolute;*/
+    display: flex;
+    flex-direction: column;
+}
+#board>.line {
+    display: flex;
+    flex-direction: row;
+}
+#board>.line>.cell
+{
+    width: 25px;
+    height: 25px;
+    background-color: #999;
+    border: 0 solid #666;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    box-sizing: content-box;
+    text-align: center;
+    color: #999;
+    font-size: 12pt;
+    line-height: 18pt;
+    cursor: pointer;
+}
+#board>div.line:nth-of-type(5n)>.cell {
+    border-bottom-width: 2px;
+}
+#board>.line>div.cell:nth-of-type(5n) {
+    border-right-width: 2px;
+}
+#board>.line>.cell.on {
+    background-color: #fff;
+}
+#board>.line>.cell.off {
+    background-color: #777;
+}
+#board>.line>.cell.hint-cell {
+    background-color: #555;
+}
+#board>.line>.cell.hint-cell.match {
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+}
+#board>.line>.cell.hidden-cell {
+    background-color: #666;
+    cursor: default;
+}
+#boardlist .slider-pager {
+    bottom: 0;
+}
+#boardlist .padded-slide-page {
+    display: flex;
+    align-items: center;
+    background: #999;
+    height: 260px;
+    margin: 20px 60px;
+    cursor: pointer;
+}
+
+.range-block {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background-color: #999;
+    margin: auto;
+}
+.range-block .range-block-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+.padded-slide-title,
+.range-block .range-block-content .range-block-title {
+    width: 100%;
+    text-align: center;
+    font-size: 4em;
+    font-family: "Futura-CondensedMedium";
+    color: #666;
+}
+.range-block .range {
+    position: absolute;
+    padding: 0;
+    width: 100%;
+}
+.range-block .range-vertical {
+    transform: rotate(-90deg);
+    transform-origin: left bottom;
+    bottom: 0;
+}
+.range-block .range-horizontal {
+    bottom: -53px;
+}
+.range-block .range .button-icon.icon::before {
+    font-size: 22px;
+    margin-top: 3px;
+}
+
+
+.range-block .range-lock {
+    position: absolute;
+    width: 53px;
+    height: 53px;
+    left: -53px;
+}
+.popup-dark .popup {
+    background-color: #ccc;
+}
+.center-child {
+    display: flex;
+}
+.center-child>* {
+    flex: 1;
+    align-self: center;
+}

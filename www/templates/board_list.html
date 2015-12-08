@@ -1,0 +1,23 @@
+<ion-view title="Board List">
+    <ion-content scroll="false" has-bouncing="false" class="center-child">
+        <ion-slide-box id="boardlist">
+            <ion-slide
+                    ng-repeat="board in savedBoards">
+                <a class="padded-slide-page"
+                        ng-click="loadGame(board)">
+                    <span class="padded-slide-title">{{board.boardData[0].length}}&times;{{board.boardData.length}}</span>
+                </a>
+            </ion-slide>
+        </ion-slide-box>
+    </ion-content>
+    <ion-footer-bar class="bar-clear">
+        <div class="buttons">
+            <button class="button button-icon"
+                    ng-click="$ionicGoBack()">BACK</button>
+        </div>
+        <div class="buttons pull-right">
+            <button class="button button-icon"
+                    ng-click="editCurrentBoard()">EDIT</button>
+        </div>
+    </ion-footer-bar>
+</ion-view>

@@ -1,0 +1,97 @@
+<ion-view>
+    <ion-content scroll="false" has-bouncing="false">
+        <ion-scroll id="boardscroll" delegate-handle="boardScroll" direction="xy" locking="false" scrollbar-x="false" scrollbar-y="false" has-bouncing="false" zooming="true"
+                min-zoom="0.5" max-zoom="1.5" class="center-child">
+            <div id="board"
+                    ng-style="{
+                        width: boardSize.x+'px',
+                        height: boardSize.y+'px'
+                    }">
+                <!-- top hint line -->
+                <span class="line"
+                        ng-repeat="y in columnHints.maxCol | limitTo: columnHints.getMaxY() track by $index">
+
+                    <!-- left empty cells before top hints of the current line -->
+                    <span class="cell hidden-cell"
+                            ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index">
+                    </span>
+
+                    <!-- top hints of the current line -->
+                    <div class="cell hint-cell" kind="tophint" x="{{$index}}" y="{{$parent.$index}}"
+                            ng-repeat="x in columnHints.col"
+                            ng-class="{ 'match': columnHints.matching[$index] }">
+                        {{columnHints.getHint($index, $parent.$index, 'T')}}
+                    </div>
+                </span>
+
+                <!-- board line -->
+                <div class="line"
+                        ng-repeat="y in boardData">
+
+                    <!-- left hints of the current line -->
+                    <span class="cell hint-cell" kind="lefthint" x="{{$index}}" y="{{$parent.$index}}"
+                            ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index"
+                            ng-class="{ 'match': rowHints.matching[$parent.$index] }">
+                        {{rowHints.getHint($parent.$index, $index, 'L')}}
+                    </span>
+
+                    <!-- board cells of the current line -->
+                    <div class="cell" kind="data" x="{{$index}}" y="{{$parent.$index}}"
+                            ng-repeat="x in y"
+                            ng-class="{ on: x.value===1, off: x.value===0 }">
+                    </div>
+
+                    <!-- right hints of the current line -->
+                    <span class="cell hint-cell" kind="righthint" x="{{$index}}" y="{{$parent.$index}}"
+                            ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index"
+                            ng-class="{ 'match': rowHints.matching[$parent.$index] }">
+                        {{rowHints.getHint($parent.$index, $index, 'R')}}
+                    </span>
+                </div>
+
+                <!-- bottom hint line -->
+                <span class="line"
+                        ng-repeat="y in columnHints.maxCol | limitTo: columnHints.getMaxY() track by $index">
+
+                    <!-- left empty cells before bottom hints of the current line -->
+                    <span class="cell hidden-cell"
+                            ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index">
+                    </span>
+
+                    <!-- bottom hints of the current line -->
+                    <div class="cell hint-cell" kind="bottomhint" x="{{$index}}" y="{{$parent.$index}}"
+                            ng-repeat="x in columnHints.col"
+                            ng-class="{ 'match': columnHints.matching[$index] }">
+                        {{columnHints.getHint($index, $parent.$index, 'B')}}
+                    </div>
+                </span>
+            </div>
+        </ion-scroll>
+
+        <ion-footer-bar class="bar-clear">
+            <div class="buttons">
+                <button class="button button-icon"
+                        ng-click="$ionicGoBack()">BACK</button>
+            </div>
+            <div class="buttons pull-right">
+                <button class="button button-icon icon ion-trash-a"
+                        ng-if="isSetup() &amp;&amp; !isNewBoard()"
+                        ng-click="delete()"></button>
+                <button class="button button-icon"
+                        ng-if="isSetup()"
+                        ng-click="save()">SAVE</button>
+                <button class="button button-icon icon ion-ios-trash-outline"
+                        ng-if="!isSetup()"
+                        ng-click="clear()"></button>
+                <button class="button button-icon icon ion-ios-undo-outline"
+                        ng-if="!isSetup()"
+                        ng-click="undo()"
+                        ng-disabled="!canUndo()"></button>
+                <button class="button button-icon icon ion-ios-redo-outline"
+                        ng-if="!isSetup()"
+                        ng-click="redo()"
+                        ng-disabled="!canRedo()"></button>
+            </div>
+        </ion-footer-bar>
+    </ion-content>
+</ion-view>
