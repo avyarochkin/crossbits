@@ -1,5 +1,30 @@
-var CELL_NIL = -1, CELL_OFF = 0, CELL_ON = 1, BOARDKEY = 'board', STATUS_SETUP = 'SETUP', STATUS_GAME = 'GAME';
-var SIDE_LEFT = 'L', SIDE_RIGHT = 'R', SIDE_TOP = 'T', SIDE_BOTTOM = 'B';
+/* global angular staticBoards */
+/* exported STATUS SIDE HINTKIND */
+var CELL = {
+        NIL: -1,
+        OFF: 0,
+        ON: 1
+    },
+    STATUS = {
+        SETUP: 'SETUP',
+        GAME: 'GAME',
+        OVER: 'OVER'
+    },
+    SIDE = {
+        LEFT: 'L',
+        RIGHT: 'R',
+        TOP: 'T',
+        BOTTOM: 'B'
+    },
+    HINTKIND = {
+        TOP: 'tophint',
+        BOTTOM: 'bottomhint',
+        LEFT: 'lefthint',
+        RIGHT: 'righthint'
+    };
+
+var BOARDKEY = 'board';
+
 
 angular.module('crossbits.services', [])
 
@@ -14,19 +39,21 @@ angular.module('crossbits.services', [])
         delete: function(key) {
             $window.localStorage.removeItem(key);
         }
-    }
+    };
 }])
 
 .factory('Game', function(LocalStorage) {
 
+    var allBoards = [];
     var savedBoards = [];
 
+    var sourceBoard = {};
     var boardData = [];
     var boardIndex = 0;
     var boardStatus = '';
     var boardSize = {x: 0, y: 0};
 
-    function loadAllBoards() {
+    function loadSavedBoards() {
         var index = 0, board = {};
         do {
             board = LocalStorage.getObject(BOARDKEY.concat(index));
@@ -35,44 +62,50 @@ angular.module('crossbits.services', [])
                 index++;
             }
         } while (board);
-    };
-    function getStaticBoards() {
-        return staticBoards.map(function(board) {
-            var boardData = [];
-            var width = board.columnHintData.length;
-            var height = board.rowHintData.length;
+        allBoards.push(savedBoards);
+    }
 
-            for (var y = 0; y < height; y++) {
-                boardData.push(new Array());
-                for (var x = 0; x < width; x++) {
-                    boardData[y].push({value: CELL_NIL});
+    function initAllBoards() {
+        return staticBoards.map(function(stage) {
+            return stage.map(function(board) {
+                var boardData = [];
+                var width = board.columnHintData.length;
+                var height = board.rowHintData.length;
+
+                for (var y = 0; y < height; y++) {
+                    boardData.push(new Array());
+                    for (var x = 0; x < width; x++) {
+                        boardData[y].push({value: CELL.NIL});
+                    }
                 }
-            }
 
-            return {
-                boardData: boardData,
-                columnHints: {
-                    col: board.columnHintData.map(function(col) {
-                        return col.map(function(value) {
-                            return { hint: value };
-                        });
-                    })
-                },
-                rowHints: {
-                    row: board.rowHintData.map(function(row) {
-                        return row.map(function(value) {
-                            return { hint: value };
-                        });
-                    })
-                },
-                static: true
-            };
+                return {
+                    boardData: boardData,
+                    columnHints: {
+                        col: board.columnHintData.map(function(col) {
+                            return col.map(function(value) {
+                                return { hint: value };
+                            });
+                        })
+                    },
+                    rowHints: {
+                        row: board.rowHintData.map(function(row) {
+                            return row.map(function(value) {
+                                return { hint: value };
+                            });
+                        })
+                    },
+                    static: true
+                };
+            });
         });
-    };
-    // initial load
-    loadAllBoards();
-    // append static boards to saved boards
-    Array.prototype.push.apply(savedBoards, getStaticBoards());
+    }
+
+
+    // initialize all static boards
+    allBoards = initAllBoards();
+    // append saved boards to static boards
+    loadSavedBoards();
 
     // todo should go to controller
     function setBoardSize() {
@@ -80,7 +113,7 @@ angular.module('crossbits.services', [])
         boardSize.x = width * 26 + Math.floor(width / 5) + rowHints.getMaxX() * 26 * 2;
         boardSize.y = height * 26 + Math.floor(height / 5) + columnHints.getMaxY() * 26 * 2;
         // console.log('board size '+boardSize.x+':'+boardSize.y);
-    };
+    }
 
     function setBoardData(y, x, value) {
         undoData.addItem({
@@ -97,14 +130,14 @@ angular.module('crossbits.services', [])
         matching: [],
         maxCol: null, // todo: replace by ng-repeat-range
         getHint: function(x, y, side) {
-            if (side === SIDE_TOP) {
+            if (side === SIDE.TOP) {
                 y -= this.getMaxY() - this.col[x].length;
             }
-            return (y < 0) ? "" : (y < this.col[x].length) ? this.col[x][y].hint : "";
+            return (y < 0) ? '' : (y < this.col[x].length) ? this.col[x][y].hint : '';
         },
         getMaxY: function() {
             var maxY = Math.floor((boardData.length + 1) / 2);
-            return Math.min(this.getLongestColLength() + ((boardStatus === STATUS_SETUP) ? 1 : 0), maxY);
+            return Math.min(this.getLongestColLength() + ((boardStatus === STATUS.SETUP) ? 1 : 0), maxY);
         },
         getLongestColLength: function() {
             return this.col.reduce(function(a, b) {
@@ -115,7 +148,7 @@ angular.module('crossbits.services', [])
             var result = {x: x, y: y};
             var last = false;
 
-            if (side === SIDE_TOP) {
+            if (side === SIDE.TOP) {
                 y -= this.getMaxY() - this.col[x].length;
                 if (y < 0) {
                     this.col[x].splice(0, 0, {hint: 0});
@@ -147,9 +180,9 @@ angular.module('crossbits.services', [])
             var boardHeight = boardData.length, hintCol = this.col[x], hintSize = hintCol.length;
 
             for (var y = 0; match && y < boardHeight; y++) {
-                if (boardData[y][x].value === CELL_ON) {
+                if (boardData[y][x].value === CELL.ON) {
                     chainLength++;
-                    if (y === boardHeight-1 || boardData[y+1][x].value !== CELL_ON) {
+                    if (y === boardHeight-1 || boardData[y+1][x].value !== CELL.ON) {
                         match = (hintIndex < hintSize && hintCol[hintIndex].hint === chainLength);
                         hintIndex++;
                     }
@@ -158,6 +191,14 @@ angular.module('crossbits.services', [])
                 }
             }
             this.matching[x] = match && (hintIndex === hintSize);
+        },
+        allColsMatch: function(check) {
+            var matching = true;
+            for (var x = 0; x < this.matching.length; x++) {
+                if (check) this.checkCol(x);
+                matching = matching && this.matching[x];
+            }
+            return matching;
         },
         // try to solve the board column based on the hint values
         solveCol: function(x) {
@@ -203,7 +244,7 @@ angular.module('crossbits.services', [])
                 }
                 // all pieces are built successfully
                 return true;
-            };
+            }
 
             /*
             Tries to build the next variant based on the current state of <variant>
@@ -223,7 +264,7 @@ angular.module('crossbits.services', [])
                 }
                 // all pieces are shifted to their last position - cannot build a new variant
                 return false;
-            };
+            }
 
             /*
             Checks if <variant> conflicts with any column cells set to on/off.
@@ -234,22 +275,22 @@ angular.module('crossbits.services', [])
                 for (var y = 0; y < dataLength && !conflict; y++) {
                     if (index >= hintLength || y < variant[index].start) {
                         // check conflict with cells outside of variant pieces
-                        conflict = (boardData[y][x].value === CELL_ON);
+                        conflict = (boardData[y][x].value === CELL.ON);
                     } else if (y <= variant[index].end) {
                         // check conflict with cells inside the variant pieces
-                        conflict = (boardData[y][x].value == CELL_OFF);
+                        conflict = (boardData[y][x].value == CELL.OFF);
                         // moving to the next piece
                         if (y === variant[index].end) {
                             index++;
                         }
                     }
                 }
-                console.log(variant.map(function(item){
-                    return item.start+':'+item.end;
-                }) + ' - ' + (conflict ? 'conflict' : 'OK'));
+                //console.log(variant.map(function(item){
+                //    return item.start+':'+item.end;
+                //}) + ' - ' + (conflict ? 'conflict' : 'OK'));
 
                 return conflict;
-            };
+            }
 
             /*
             Applies <variant> to <solution>. All cells that stay on or off across
@@ -260,18 +301,18 @@ angular.module('crossbits.services', [])
                 for (var y = 0; y < dataLength; y++) {
                     if (index >= hintLength || y < variant[index].start) {
                         // apply to cells outside of variant pieces
-                        solution[y] = (solution[y] === undefined || solution[y] === CELL_OFF) ? CELL_OFF : CELL_NIL;
+                        solution[y] = (solution[y] === undefined || solution[y] === CELL.OFF) ? CELL.OFF : CELL.NIL;
                     } else if (y <= variant[index].end) {
                         // apply to cells inside the variant pieces
-                        solution[y] = (solution[y] === undefined || solution[y] === CELL_ON) ? CELL_ON : CELL_NIL;
+                        solution[y] = (solution[y] === undefined || solution[y] === CELL.ON) ? CELL.ON : CELL.NIL;
                         // moving to the next piece
                         if (y === variant[index].end) {
                             index++;
                         }
                     }
                 }
-                console.log('Solution: ' + solution);
-            };
+                //console.log('Solution: ' + solution);
+            }
 
             /*
             Applies <solution> to the board column.
@@ -280,14 +321,15 @@ angular.module('crossbits.services', [])
             function applySolutionToBoard() {
                 undoData.startBlock();
                 for (var y = 0; y < dataLength; y++) {
-                    if (solution[y] === CELL_OFF || solution[y] === CELL_ON) {
+                    if (solution[y] === CELL.OFF || solution[y] === CELL.ON) {
                         setBoardData(y, x, solution[y]);
                         rowHints.checkRow(y);
                     }
                 }
                 undoData.endBlock();
                 self.checkCol(x);
-            };
+                checkGame(false);
+            }
 
             // main algorithm (self explanatory)
             while (buildNextVariant()) {
@@ -305,14 +347,14 @@ angular.module('crossbits.services', [])
         row: [],
         maxRow: null, // todo: replace by ng-repeat-range
         getHint: function(y, x, side) {
-            if (side === SIDE_LEFT) {
+            if (side === SIDE.LEFT) {
                 x -= this.getMaxX() - this.row[y].length;
             }
-            return (x < 0) ? "" : (x < this.row[y].length) ? this.row[y][x].hint : "";
+            return (x < 0) ? '' : (x < this.row[y].length) ? this.row[y][x].hint : '';
         },
         getMaxX: function() {
             var maxX = Math.floor((boardData[0].length + 1) / 2);
-            return Math.min(this.getLongestRowLength() + ((boardStatus === STATUS_SETUP) ? 1 : 0), maxX);
+            return Math.min(this.getLongestRowLength() + ((boardStatus === STATUS.SETUP) ? 1 : 0), maxX);
         },
         getLongestRowLength: function() {
             return this.row.reduce(function(a, b) {
@@ -323,7 +365,7 @@ angular.module('crossbits.services', [])
             var result = {x: x, y: y};
             var last = false;
 
-            if (side === SIDE_LEFT) {
+            if (side === SIDE.LEFT) {
                 x -= this.getMaxX() - this.row[y].length;
                 if (x < 0) {
                     this.row[y].splice(0, 0, {hint: 0});
@@ -355,9 +397,9 @@ angular.module('crossbits.services', [])
             var boardWidth = boardData[0].length, hintRow = this.row[y], hintSize = hintRow.length;
 
             for (var x = 0; match && x < boardWidth; x++) {
-                if (boardData[y][x].value === CELL_ON) {
+                if (boardData[y][x].value === CELL.ON) {
                     chainLength++;
-                    if (x === boardWidth-1 || boardData[y][x+1].value !== CELL_ON) {
+                    if (x === boardWidth-1 || boardData[y][x+1].value !== CELL.ON) {
                         match = (hintIndex < hintSize && hintRow[hintIndex].hint === chainLength);
                         hintIndex++;
                     }
@@ -366,6 +408,14 @@ angular.module('crossbits.services', [])
                 }
             }
             this.matching[y] = match && (hintIndex === hintSize);
+        },
+        allRowsMatch: function(check) {
+            var matching = true;
+            for (var y = 0; y < this.matching.length; y++) {
+                if (check) this.checkRow(y);
+                matching = matching && this.matching[y];
+            }
+            return matching;
         },
         // try to solve the board row based on the hint values
         solveRow: function(y) {
@@ -386,7 +436,7 @@ angular.module('crossbits.services', [])
                     offset = piece.end + 2;
                 }
                 return true;
-            };
+            }
 
             function buildNextVariant() {
                 if (!variant[0]) {
@@ -396,53 +446,54 @@ angular.module('crossbits.services', [])
                     if (buildVariant(index, variant[index].start + 1)) return true;
                 }
                 return false;
-            };
+            }
 
             function variantConflictsWithBoard() {
                 var index = 0, conflict = false;
                 for (var x = 0; x < dataLength && !conflict; x++) {
                     if (index >= hintLength || x < variant[index].start) {
-                        conflict = (boardData[y][x].value === CELL_ON);
+                        conflict = (boardData[y][x].value === CELL.ON);
                     } else if (x <= variant[index].end) {
-                        conflict = (boardData[y][x].value == CELL_OFF);
+                        conflict = (boardData[y][x].value == CELL.OFF);
                         if (x === variant[index].end) {
                             index++;
                         }
                     }
                 }
-                console.log(variant.map(function(item){
-                    return item.start+':'+item.end;
-                }) + ' - ' + (conflict ? 'conflict' : 'OK'));
+                //console.log(variant.map(function(item){
+                //    return item.start+':'+item.end;
+                //}) + ' - ' + (conflict ? 'conflict' : 'OK'));
 
                 return conflict;
-            };
+            }
 
             function applyVariantToSolution() {
                 var index = 0;
                 for (var x = 0; x < dataLength; x++) {
                     if (index >= hintLength || x < variant[index].start) {
-                        solution[x] = (solution[x] === undefined || solution[x] === CELL_OFF) ? CELL_OFF : CELL_NIL;
+                        solution[x] = (solution[x] === undefined || solution[x] === CELL.OFF) ? CELL.OFF : CELL.NIL;
                     } else if (x <= variant[index].end) {
-                        solution[x] = (solution[x] === undefined || solution[x] === CELL_ON) ? CELL_ON : CELL_NIL;
+                        solution[x] = (solution[x] === undefined || solution[x] === CELL.ON) ? CELL.ON : CELL.NIL;
                         if (x === variant[index].end) {
                             index++;
                         }
                     }
                 }
-                console.log('Solution: ' + solution);
-            };
+                //console.log('Solution: ' + solution);
+            }
 
             function applySolutionToBoard() {
                 undoData.startBlock();
                 for (var x = 0; x < dataLength; x++) {
-                    if (solution[x] === CELL_OFF || solution[x] === CELL_ON) {
+                    if (solution[x] === CELL.OFF || solution[x] === CELL.ON) {
                         setBoardData(y, x, solution[x]);
                         columnHints.checkCol(x);
                     }
                 }
                 undoData.endBlock();
                 self.checkRow(y);
-            };
+                checkGame(false);
+            }
 
             // main algorithm (self explanatory)
             while (buildNextVariant()) {
@@ -505,7 +556,7 @@ angular.module('crossbits.services', [])
         undo: function() {
             function doUndo(item) {
                 boardData[item.y][item.x].value = item.was;
-            };
+            }
 
             this.index--;
             var current = this.getCurrentItem();
@@ -526,7 +577,7 @@ angular.module('crossbits.services', [])
         redo: function() {
             function doRedo(item) {
                 boardData[item.y][item.x].value = item.is;
-            };
+            }
 
             var current = this.getCurrentItem();
             this.index++;
@@ -543,7 +594,22 @@ angular.module('crossbits.services', [])
         }
     };
 
+    function checkGame(check) {
+        if (boardStatus === STATUS.GAME) {
+            var allColsMatch = columnHints.allColsMatch(check);
+            var allRowsMatch = rowHints.allRowsMatch(check);
+            if (allColsMatch && allRowsMatch) {
+                boardStatus = STATUS.OVER;
+                sourceBoard.solved = true;
+                console.log('Game solved!');
+            }
+        }
+    }
+
     return {
+        allBoards: function() {
+            return allBoards;
+        },
         savedBoards: function() {
             return savedBoards;
         },
@@ -573,12 +639,16 @@ angular.module('crossbits.services', [])
             for (var y = 0; y < height; y++) {
                 boardData.push(new Array());
                 for (var x = 0; x < width; x++) {
-                    boardData[y].push({value: CELL_NIL});
+                    boardData[y].push({value: CELL.NIL});
                 }
             }
             columnHints.reset();
             rowHints.reset();
             undoData.reset();
+            sourceBoard.solved = false;
+            if (boardStatus != STATUS.SETUP) {
+                boardStatus = STATUS.GAME;
+            }
         },
         initWithSize: function(width, height, status) {
             boardData = [];
@@ -600,6 +670,7 @@ angular.module('crossbits.services', [])
             setBoardSize();
         },
         initFromSaved: function(board, status) {
+            sourceBoard = board;
             boardData = board.boardData;
             var width = boardData[0].length, height = boardData.length;
             boardIndex = savedBoards.indexOf(board);
@@ -611,8 +682,15 @@ angular.module('crossbits.services', [])
             rowHints.matching = new Array(height);
             rowHints.maxRow = Array(width);
             setBoardSize();
+            checkGame(true);
         },
-        setBoardData: setBoardData,
+        checkBoard: checkGame,
+        setBoardXY: function(x, y, value) {
+            setBoardData(y, x, value);
+            columnHints.checkCol(x);
+            rowHints.checkRow(y);
+            checkGame(false);
+        },
         saveCurrentBoard: function() {
             var board = {
                 boardData: boardData,

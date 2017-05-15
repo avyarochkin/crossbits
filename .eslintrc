@@ -1,0 +1,38 @@
+{
+    "rules": {
+        "indent": [
+            0,
+            "tab"
+        ],
+        "quotes": [
+            1,
+            "single"
+        ],
+        "linebreak-style": [
+            2,
+            "unix"
+        ],
+        "semi": [
+            2,
+            "always"
+        ],
+        "no-mixed-spaces-and-tabs": [
+            0,
+            "smart-tabs"
+        ],
+        "no-unused-vars": [
+            1,
+            {
+                "vars": "all",
+                "args": "none"
+            }
+        ],
+        "no-console": [
+            0
+        ]
+    },
+    "env": {
+        "browser": true
+    },
+    "extends": "eslint:recommended"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "crossbits",
+  "app_id": "0849dc85",
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
+}

@@ -1,3 +1,4 @@
+/* global angular console */
 angular.module('crossbits.directives', [])
 
 .directive('numPicker', function($ionicScrollDelegate, $timeout) {
@@ -71,11 +72,14 @@ angular.module('crossbits.directives', [])
 
                 if ($scope.value !== v) {
                     scrolling = true;
-                    $scope.value = v;
-                    console.log('num-picker: SET ' + v);
-                    $scope.change();
-                    $scope.$apply();
-                    scrolling = false;
+                    try {
+                        $scope.value = v;
+                        console.log('num-picker: SET ' + v);
+                        $scope.change();
+                        $scope.$apply();
+                    } finally {
+                        scrolling = false;                        
+                    }
                 }
             });
 

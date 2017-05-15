@@ -21,3 +21,301 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
+$darkBlue:          #093234;
+$semiDarkBlue:      #186266;
+$midBlue:           #2B8589;
+$lightBlue:         #4BACB1;
+$ultraLightBlue:    #81DEE2;
+// $darkBlue:       #035;
+// $semiDarkBlue:   lighten($darkBlue, 10%);
+// $midBlue:        lighten($darkBlue, 25%);
+// $lightBlue:      lighten($darkBlue, 40%);
+// $ultraLightBlue: lighten($darkBlue, 60%);
+$lightest:       #FFF;
+
+.pane {
+    background-color: $darkBlue;
+}
+
+#boardlist .padded-slide-page,
+.range-block,
+#hintPad .pad {
+    background-color: $midBlue;
+}
+num-picker > .overlay {
+    background: linear-gradient(
+                    rgba($midBlue, 1) 10%,
+                    rgba($midBlue, 0) 40%,
+                    rgba($midBlue, 0) 60%,
+                    rgba($midBlue, 1) 90%);
+}
+#boardlist .padded-slide-title,
+.range-block .range-block-content,
+.slider-pager .slider-pager-page,
+#hintPad .line {
+    color: $lightBlue;
+}
+
+#board {
+    >.line>.cell {
+        border-color: $darkBlue;
+        background-color: $midBlue;
+        color: $ultraLightBlue;
+        &.on { background-color: $ultraLightBlue; }
+        &.off { background-color: $darkBlue; }
+        &.hint-cell {
+            background-color: $semiDarkBlue;
+            &.focus {
+                background-color: $lightBlue;
+                color: $ultraLightBlue;
+            }
+            &.match {
+                color: $lightest;
+                text-shadow: 0 0 10px $lightest;
+            }
+        }
+        &.hidden-cell { background-color: $darkBlue; }
+    }
+    &.gameover>.line>.cell {
+        border-color: $midBlue;
+        &.on { border-color: $ultraLightBlue; }
+        &.off { border-color: $darkBlue; }
+        &.hint-cell { border-color: $semiDarkBlue; }
+        &.hidden-cell { border-color: $darkBlue; }
+    }
+}
+
+#mainmenu .item-content,
+button,
+num-picker .num {
+    color: $ultraLightBlue;
+}
+button:disabled {
+    color: #24A;
+}
+.button.button-dark {
+    border-color: #234;
+    background-color: #345;
+}
+.button.button-assertive {
+    border-color: #D13;
+    background-color: #E46;
+}
+.popup-dark .popup {
+    background-color: #9BE;
+}
+
+
+.padding {
+    padding: 40px;
+}
+ion-footer-bar {
+    pointer-events: none;
+}
+ion-footer-bar button,
+.backdrop.active {
+    pointer-events: auto;
+}
+
+#boardscroll {
+    width: 100%;
+    height: 100%;
+}
+#board {
+    /*position: absolute;*/
+    display: flex;
+    flex-direction: column;
+    >.line {
+        display: flex;
+        flex-direction: row;
+        >.cell {
+            width: 25px;
+            height: 25px;
+            border-style: solid;
+            border-width: 0 1px 1px 0;
+            box-sizing: content-box;
+            text-align: center;
+            font-size: 12pt;
+            line-height: 18pt;
+            cursor: pointer;
+        }
+    }
+    >div.line:nth-of-type(5n)>.cell {
+        border-bottom-width: 2px;
+    }
+    >.line>div.cell:nth-of-type(5n) {
+        border-right-width: 2px;
+    }
+}
+
+.stage-slides {
+    height: 100%;
+    padding-bottom: 10px;
+
+    .slider-slide {
+        padding: 20px;
+    }
+    .stage-slide {
+        height: 100%;
+        //border: 3px solid $semiDarkBlue;
+        background-color: $semiDarkBlue;
+        border-radius: 10px;
+        overflow-y: auto;
+    }
+    h3 {
+        margin: 0;
+        line-height: 60px;
+        font-weight: normal;
+        text-align: center;
+        color: $ultraLightBlue;
+    }
+    .stage {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 0 20px;
+
+        .stage-board {
+            position: relative;
+            margin: 5px;
+            width: 60px;
+            height: 60px;
+            background-color: $lightBlue;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            color: $darkBlue;
+            &.new {
+                background-color: $midBlue;
+                color: $lightBlue;
+            }
+            .board-flag {
+                position: absolute;
+                right: 10%;
+                bottom: 0;
+                color: $semiDarkBlue;
+            }
+        }
+    }
+    .slider-pager {
+        bottom: 10px;
+    }
+}
+
+.range-block {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    border-radius: 20px;
+}
+.range-block .range-block-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.padded-slide-title,
+.range-block .range-block-content,
+#hintPad .line {
+    width: 100%;
+    text-align: center;
+    font-size: 4em;
+    font-family: "Futura-CondensedMedium";
+}
+
+.center-child {
+    display: flex;
+}
+.center-child > * {
+    flex: 1;
+    align-self: center;
+}
+num-picker {
+    position: relative;
+    height: 3em;
+    overflow: hidden;
+}
+num-picker > ion-scroll {
+    height: 100%;
+    /*margin-top: 0 !important;*/
+}
+num-picker .num {
+    text-align: right;
+    height: 1em;
+    line-height: 1em;
+    padding: 0 .1em;
+    cursor: pointer;
+}
+num-picker > .overlay {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.modal-backdrop-bg {
+    background-color: black;
+    opacity: .25;
+}
+
+#hintPad {
+    left: 50%;
+    top: 50%;
+    width: 250px;
+    margin-left: -125px;
+    min-height: 250px;
+    margin-top: -125px;
+    border-radius: 125px;
+    background-color: transparent;
+    .pad {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 100%;
+        height: 100%;
+        opacity: 0.5;
+    }
+    .line {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+    &.active.fade-in {
+        animation-name: fadeIn;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: both;
+    }
+    &.ng-leave-active.fade-in {
+        animation-name: fadeOut;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: both;
+    }
+}
+@keyframes fadeIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+@keyframes fadeOut {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}

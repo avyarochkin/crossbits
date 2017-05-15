@@ -1,3 +1,4 @@
+/* global angular */
 angular.module('crossbits', [
     'ionic',
     'ui.router',
@@ -10,10 +11,10 @@ angular.module('crossbits', [
 
 .config(function($stateProvider, $urlRouterProvider) {
 
-    $stateProvider.state('menu', {
+    $stateProvider.state('start', {
         url: '/',
-        templateUrl: 'templates/menu.html',
-        controller: 'MainCtrl'
+        templateUrl: 'templates/start.html',
+        controller: 'StartCtrl'
     });
 
     $stateProvider.state('create', {
@@ -34,5 +35,5 @@ angular.module('crossbits', [
         controller: 'BoardCtrl'
     });
 
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/load');
 });

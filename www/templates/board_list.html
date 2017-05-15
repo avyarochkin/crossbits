@@ -1,23 +1,31 @@
 <ion-view title="Board List">
-    <ion-content scroll="false" has-bouncing="false" class="center-child">
-        <ion-slide-box id="boardlist">
+    <ion-content scroll="false" has-bouncing="false" class="">
+
+        <ion-slide-box class="stage-slides">
             <ion-slide
-                    ng-repeat="board in savedBoards">
-                <a class="padded-slide-page"
-                        ng-click="loadGame(board)">
-                    <span class="padded-slide-title">{{board.boardData[0].length}}&times;{{board.boardData.length}}</span>
-                </a>
+                    ng-repeat="stageBoards in allBoards">
+                <div class="stage-slide">
+                    <h3 ng-if="$index < allBoards.length-1">STAGE {{$index+1}}</h3>
+                    <h3 ng-if="$index === allBoards.length-1">SAVED BOARDS</h3>
+                    <div class="stage">
+                        <div class="stage-board"
+                                ng-repeat="board in stageBoards"
+                                ng-click="loadGame(board)"
+                                on-hold="editGame(board)">
+                            <span>{{board.boardData[0].length}}&times;{{board.boardData.length}}</span>
+                            <i class="board-flag ion-trophy"
+                                    ng-if="board.solved"></i>
+                        </div>
+                        <div class="stage-board new"
+                                ng-if="$index === allBoards.length-1"
+                                ui-sref="create">
+                            <i class="icon ion-plus"></i>
+                        </div>
+                    </div>
+                </div>
             </ion-slide>
         </ion-slide-box>
+
     </ion-content>
-    <ion-footer-bar class="bar-clear">
-        <div class="buttons">
-            <button class="button button-icon"
-                    ng-click="$ionicGoBack()">BACK</button>
-        </div>
-        <div class="buttons pull-right">
-            <button class="button button-icon"
-                    ng-click="editCurrentBoard()">EDIT</button>
-        </div>
-    </ion-footer-bar>
+
 </ion-view>

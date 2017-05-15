@@ -1,0 +1,26 @@
+<ion-modal-view id="hintPad">
+    <ion-content scroll="false">
+        <div class="pad">
+            <div class="line">
+                <button class="button-icon icon ion-chevron-up"
+                        ng-click="hintPad.move('U')"
+                        ng-disabled="!hintPad.canMove('U')"></button>
+            </div>
+            <div class="line">
+                <button class="button-icon icon ion-chevron-left"
+                        ng-click="hintPad.move('L')"
+                        ng-disabled="!hintPad.canMove('L')"></button>
+                <num-picker value="hintPad.value" min="hintPad.min" max="hintPad.max"
+                        change="hintPad.change()"></num-picker>
+                <button class="button-icon icon ion-chevron-right"
+                        ng-click="hintPad.move('R')"
+                        ng-disabled="!hintPad.canMove('R')"></button>
+            </div>
+            <div class="line">
+                <button class="button-icon icon ion-chevron-down"
+                        ng-click="hintPad.move('D')"
+                        ng-disabled="!hintPad.canMove('D')"></button>
+            </div>
+        </div>
+    </ion-content>
+ </ion-modal-view>

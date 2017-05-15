@@ -9,12 +9,17 @@
     </author>
   <content src="index.html"/>
   <access origin="*"/>
+  <preference name="Fullscreen" value="true"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>
+  <preference name="StatusBarOverlaysWebView" value="true"/>
+  <preference name="StatusBarBackgroundColor" value="#000000"/>
+  <preference name="StatusBarStyle" value="blacktranslucent"/>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
+    <param name="onload" value="true" />
   </feature>
 </widget>

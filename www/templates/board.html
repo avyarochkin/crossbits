@@ -1,8 +1,14 @@
 <ion-view>
     <ion-content scroll="false" has-bouncing="false">
+
         <ion-scroll id="boardscroll" delegate-handle="boardScroll" direction="xy" locking="false" scrollbar-x="false" scrollbar-y="false"
-                has-bouncing="false" zooming="true" min-zoom="0.5" max-zoom="1.5">
+                has-bouncing="true" zooming="true" min-zoom="0.2" max-zoom="1.5">
             <div id="board"
+                    ng-class="{
+                        setup: isSetup(),
+                        game: isGame(),
+                        gameover: isGameOver()
+                    }"
                     ng-style="{
                         width: boardSize.x+'px',
                         height: boardSize.y+'px'
@@ -95,7 +101,7 @@
                 <button class="button button-icon"
                         ng-if="isSetup()"
                         ng-click="save()">SAVE</button>
-                <button class="button button-icon icon ion-ios-trash-outline"
+                <button class="button button-icon icon ion-ios-close-empty"
                         ng-if="!isSetup()"
                         ng-click="clear()"></button>
                 <button class="button button-icon icon ion-ios-undo-outline"

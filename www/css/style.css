@@ -1,5 +1,3 @@
-/* Empty. Add your own CSS if you like */
-
 .pane,
 #board>.line>.cell.hidden-cell {
     background-color: #026;
@@ -121,14 +119,17 @@ ion-footer-bar button,
 
 
 #boardlist .slider-pager {
-    bottom: 0;
+    bottom: 1px;
 }
-#boardlist .padded-slide-page {
+#boardlist .slider-slide {
     display: flex;
     align-items: center;
     height: 260px;
     margin: 20px 60px;
     cursor: pointer;
+}
+#boardlist .slider-slide span {
+    width: 20%;
 }
 
 .range-block {
