@@ -1,6 +1,8 @@
 angular.module('crossbits.controllers', [])
 
-.controller ('AppCtrl', function($scope, $ionicPopup, $timeout) {
+.controller('AppCtrl', function($scope, $ionicPopup, $timeout, $cordovaStatusbar) {
+
+    //$cordovaStatusbar.hide();
 
     $scope.confirmPopup = function(title, cancelText, okText, action) {
         $ionicPopup.confirm({
@@ -22,53 +24,44 @@ angular.module('crossbits.controllers', [])
             if (action) action();
         }, delay || 500);
     };
+
+    $scope.inputPopup = function(title, value, action) {
+        $scope.input = {
+            value: value
+        };
+        $ionicPopup.show({
+            template: '<input type="number" min="0" max="50" maxlength="2" ng-model="input.value">',
+            title: title,
+            scope: $scope,
+            buttons: [{
+                text: 'Cancel'
+            }, {
+                text: 'OK',
+                type: 'button-dark',
+                onTap: function(e) {
+                    //e.preventDefault();
+                    return $scope.input.value;
+                }
+            }],
+        }).then(action);
+    };
 })
 
 
-.controller('MainCtrl', function($scope, Game) {
+.controller('MainCtrl', function($scope, /*$cordovaStatusbar,*/ Game) {
     $scope.savedBoards = Game.savedBoards();
+    //$cordovaStatusbar.hide();
 })
 
 
 .controller('NewGameCtrl', function($scope, $state, Game) {
     $scope.size = {
-        _x: 5,
-        x: function(v) {
-            if (v !== undefined) {
-                this._x = parseInt(v);
-                if (this.locked) this._y = this._x;
-            }
-            return this._x;
-        },
-        _y: 5,
-        y: function(v) {
-            if (v !== undefined) {
-                this._y = parseInt(v);
-                if (this.locked) this._x = this._y;
-            }
-            return this._y;
-        },
-        locked: true,
-        toggleLocked: function() {
-            this.locked = !this.locked;
-            if (this.locked) this._y = this._x;
-        },
-        minX: 5, minY: 5,
-        maxX: 50, maxY: 50,
-        incX: function(d) { this.x(this._x + d) },
-        incY: function(d) { this.y(this._y + d) },
-        canIncX: function(d) {
-            d += this._x;
-            return (d <= this.maxX) && (d >= this.minX);
-        },
-        canIncY: function(d) {
-            d += this._y;
-            return (d <= this.maxY) && (d >= this.minY);
-        }
+        x: 5, minX: 2, maxX: 50,
+        y: 5, minY: 2, maxY: 50
     };
 
     $scope.editBoard = function() {
-        Game.initWithSize($scope.size._x, $scope.size._y, STATUS_SETUP);
+        Game.initWithSize($scope.size.x, $scope.size.y, STATUS_SETUP);
         $state.go("game");
     }
 })
@@ -91,14 +84,14 @@ angular.module('crossbits.controllers', [])
 })
 
 
-.controller('BoardCtrl', function($scope, $ionicHistory, $ionicGesture, $ionicPopup, Game, $ionicScrollDelegate) {
+.controller('BoardCtrl', function($scope, $ionicHistory, $ionicGesture, $ionicPopup, $ionicModal, Game, $ionicScrollDelegate) {
 
     $scope.boardData = Game.boardData();
     $scope.boardSize = Game.boardSize();
     $scope.columnHints = Game.columnHints();
     $scope.rowHints = Game.rowHints();
 
-    $scope.dragObj = null;
+    var dragObj = null;
 
     function boardXY(div) {
         var attrX = div.attributes["x"], attrY = div.attributes["y"];
@@ -111,6 +104,7 @@ angular.module('crossbits.controllers', [])
             return false;
         }
     }
+
     function nextCellValue(value) {
         return (value === CELL_ON) ? CELL_OFF : (value === CELL_OFF) ? CELL_NIL : CELL_ON;
     }
@@ -141,111 +135,129 @@ angular.module('crossbits.controllers', [])
 
     var boardElement = angular.element(document.querySelector("#board"));
 
-    $ionicGesture.on('tap', function(e) {
-        $scope.$apply(function() {
-            var attrKind = e.target.attributes["kind"];
-            var attrX = e.target.attributes["x"];
-            var attrY = e.target.attributes["y"];
 
-            if (attrKind && attrX && attrY) {
-                if ($scope.isSetup()) {
-                    // tap handling in setup mode
-                    switch (attrKind.value) {
-                        case 'tophint':
-                            $scope.editColumnHint(attrX.value, attrY.value, 'T');
-                            break;
-                        case 'bottomhint':
-                            $scope.editColumnHint(attrX.value, attrY.value, 'B');
-                            break;
-                        case 'lefthint':
-                            $scope.editRowHint(attrY.value, attrX.value, 'L');
-                            break;
-                        case 'righthint':
-                            $scope.editRowHint(attrY.value, attrX.value, 'R');
-                            break;
-                    }
-                } else /* !$scope.isSetup() */ {
-                    // tap handling in game mode
-                    switch (attrKind.value) {
-                        case 'tophint':
-                        case 'bottomhint':
-                            $scope.solveColumn(attrX.value);
-                            break;
-                        case 'lefthint':
-                        case 'righthint':
-                            $scope.solveRow(attrY.value);
-                            break;
-                        case 'data':
-                            toggleCell(e.target);
-                            break;
-                    }
-                }
+    $ionicGesture.on('tap', function(e) {
+
+        function handleSetupMode(kind, x, y) {
+            switch (kind) {
+                case 'tophint':
+                    $scope.editColumnHint(x, y, 'T');
+                    break;
+                case 'bottomhint':
+                    $scope.editColumnHint(x, y, 'B');
+                    break;
+                case 'lefthint':
+                    $scope.editRowHint(y, x, 'L');
+                    break;
+                case 'righthint':
+                    $scope.editRowHint(y, x, 'R');
+                    break;
             }
-        });
+        };
+
+        function handleGameMode(kind, x, y) {
+            switch (kind) {
+                case 'tophint':
+                case 'bottomhint':
+                    $scope.solveColumn(x);
+                    break;
+                case 'lefthint':
+                case 'righthint':
+                    $scope.solveRow(y);
+                    break;
+                case 'data':
+                    toggleCell(e.target);
+                    break;
+            }
+        };
+
+        var attrKind = e.target.attributes["kind"];
+        var attrX = e.target.attributes["x"];
+        var attrY = e.target.attributes["y"];
+
+        if (attrKind && attrX && attrY) {
+            $scope.$apply(function() {
+
+                if ($scope.isSetup()) {
+                    handleSetupMode(attrKind.value, attrX.value, attrY.value);
+                } else /* !$scope.isSetup() */ {
+                    handleGameMode(attrKind.value, attrX.value, attrY.value);
+                }
+
+            });
+        }
+
     }, boardElement);
 
-    $ionicGesture.on('touch', function(e) {
+
+    $ionicGesture.on('hold', function(e) {
         $scope.$apply(function() {
             var attrKind = e.target.attributes["kind"];
             // only single touch draws a line
             if (!$scope.isSetup() && attrKind && attrKind.value === 'data' && e.gesture.touches.length === 1) {
                 var xy = boardXY(e.target);
-                $scope.dragObj = {
+                dragObj = {
                     start: xy,
                     current: xy,
                     value: nextCellValue($scope.boardData[xy.y][xy.x].value),
                     orientation: null
                 };
+                $ionicScrollDelegate.$getByHandle('boardScroll').freezeScroll(true);
             } else {
-                $scope.dragObj = null;
+                dragObj = null;
             }
         });
+    }, boardElement);
+
+    $ionicGesture.on('release', function(e) {
+        dragObj = null;
+        $ionicScrollDelegate.$getByHandle('boardScroll').freezeScroll(false);
     }, boardElement);
 
     $ionicGesture.on('drag', function(e) {
         $scope.$apply(function() {
             var attrKind = e.target.attributes["kind"];
-            if (!$scope.isSetup() && attrKind && attrKind.value === 'data' && $scope.dragObj) {
+            if (!$scope.isSetup() && attrKind && attrKind.value === 'data' && dragObj) {
                 var touch = e.gesture.touches[0];
                 var xy = boardXY(document.elementFromPoint(touch.clientX, touch.clientY));
                 var firstDrag = false;
 
                 // determine the dragging orientation
-                if (xy && !$scope.dragObj.orientation) {
-                    if (xy.x !== $scope.dragObj.start.x) {
-                        $scope.dragObj.orientation = 'X';
+                if (xy && !dragObj.orientation) {
+                    if (xy.x !== dragObj.start.x) {
+                        dragObj.orientation = 'X';
                         firstDrag = true;
-                    } else if (xy.y !== $scope.dragObj.start.y) {
-                        $scope.dragObj.orientation = 'Y';
+                    } else if (xy.y !== dragObj.start.y) {
+                        dragObj.orientation = 'Y';
                         firstDrag = true;
                     }
                 }
 
                 // set all cells based on the 1st accoring to the dragging orientation
-                if (xy && $scope.dragObj.orientation === 'X' && xy.x !== $scope.dragObj.current.x) {
+                if (xy && dragObj.orientation === 'X' && xy.x !== dragObj.current.x) {
                     // horizontal orientation - resetting y-coord
-                    xy.y = $scope.dragObj.start.y;
-                    $scope.dragObj.current = xy;
+                    xy.y = dragObj.start.y;
+                    dragObj.current = xy;
                     if (!firstDrag) {
                         $scope.undo();
                     }
-                    if (xy.x !== $scope.dragObj.start.x) {
-                        setCellsAtoB(xy, $scope.dragObj.start, $scope.dragObj.value);
+                    if (xy.x !== dragObj.start.x) {
+                        setCellsAtoB(xy, dragObj.start, dragObj.value);
                     } else {
-                        $scope.dragObj.orientation = null;
+                        dragObj.orientation = null;
                     }
                 }
-                else if (xy && $scope.dragObj.orientation === 'Y' && xy.y !== $scope.dragObj.current.y) {
+                else if (xy && dragObj.orientation === 'Y' && xy.y !== dragObj.current.y) {
                     // vertical orientation - resetting x-coord
-                    xy.x = $scope.dragObj.start.x;
-                    $scope.dragObj.current = xy;
+                    xy.x = dragObj.start.x;
+                    dragObj.current = xy;
                     if (!firstDrag) {
                         $scope.undo();
                     }
-                    if (xy.y !== $scope.dragObj.start.y) {
-                        setCellsAtoB(xy, $scope.dragObj.start, $scope.dragObj.value);
+                    if (xy.y !== dragObj.start.y) {
+                        setCellsAtoB(xy, dragObj.start, dragObj.value);
                     } else {
-                        $scope.dragObj.orientation = null;
+                        dragObj.orientation = null;
                     }
 
                 }
@@ -269,23 +281,117 @@ angular.module('crossbits.controllers', [])
         return (Game.boardIndex() >= Game.savedBoards().length);
     };
 
-    $scope.editColumnHint = function(x, y, side) {
-        var value = prompt("Enter hint ["+x+","+y+"]", $scope.columnHints.getHint(x, y, side));
-        $scope.columnHints.setHint(x, y, side, value);
+
+    var dirIndex = 'UDLR';
+    var dX = [0, 0, -1, 1];
+    var dY = [-1, 1, 0, 0];
+
+    $scope.hintPad = {
+
+        value: 0,
+        min: 0,
+        max: 50,
+
+        init: function(x, y, side) {
+            this.x = parseInt(x);
+            this.y = parseInt(y);
+            this.side = side;
+
+            this.setFromHints();
+            this.ctrl.show();
+        },
+        at: function(x, y, side) {
+            return x === this.x && y === this.y && side === this.side;
+        },
+        move: function(dir) {
+            var index = dirIndex.indexOf(dir);
+            if (index >= 0) {
+                this.x += dX[index];
+                this.y += dY[index];
+                this.setFromHints();
+            }
+        },
+        setFromHints: function() {
+            var v = this.getHint(this.x, this.y, this.side);
+            this.value = (v) ? v : 0;
+            console.log('hint-pad[' + this.x + ',' + this.y + '] set to ' + this.value);
+        },
+        change: function() {
+            if (this.setHint) {
+                $scope.$apply();
+                var xy = this.setHint(this.x, this.y, this.side, this.value);
+                this.x = xy.x;
+                this.y = xy.y;
+            }
+        }
     };
 
-    $scope.editRowHint = function(y, x, side) {
-        var value = prompt("Enter hint ["+x+","+y+"]", $scope.rowHints.getHint(y, x, side));
-        $scope.rowHints.setHint(y, x, side, value);
+
+    $ionicModal.fromTemplateUrl('templates/hint_pad.html', {
+        scope: $scope,
+        animation: 'fade-in'
+    }).then(function(ctrl) {
+        $scope.hintPad.ctrl = ctrl;
+    });
+
+
+    $scope.editColumnHint = function(x, y, side) {
+
+        $scope.hintPad.getHint = function(x, y, side) {
+            return $scope.columnHints.getHint(x, y, side);
+        };
+
+        $scope.hintPad.setHint = function(x, y, side, value) {
+            return $scope.columnHints.setHint(x, y, side, value);
+        };
+
+        $scope.hintPad.canMove = function(dir) {
+            switch (dir) {
+                case 'U': return $scope.hintPad.y > 0;
+                case 'D': return $scope.hintPad.y < $scope.columnHints.getMaxY()-1;
+                case 'L': return $scope.hintPad.x > 0;
+                case 'R': return $scope.hintPad.x < $scope.columnHints.col.length-1;
+            }
+            return false;
+        };
+
+        $scope.hintPad.init(x, y, side);
     };
+
+
+    $scope.editRowHint = function(y, x, side) {
+
+        $scope.hintPad.getHint = function(x, y, side) {
+            return $scope.rowHints.getHint(y, x, side);
+        };
+
+        $scope.hintPad.setHint = function(x, y, side, value) {
+            return $scope.rowHints.setHint(y, x, side, value);
+        };
+
+        $scope.hintPad.canMove = function(dir) {
+            switch (dir) {
+                case 'U': return $scope.hintPad.y > 0;
+                case 'D': return $scope.hintPad.y < $scope.rowHints.row.length-1;
+                case 'L': return $scope.hintPad.x > 0;
+                case 'R': return $scope.hintPad.x < $scope.rowHints.getMaxX()-1;
+            }
+            return false;
+        };
+
+        $scope.hintPad.init(x, y, side);
+    };
+
 
     $scope.solveColumn = function(x) {
         $scope.columnHints.solveCol(x);
     };
 
+
     $scope.solveRow = function(y) {
         $scope.rowHints.solveRow(y);
     };
+
 
     $scope.save = function() {
         Game.saveCurrentBoard();
@@ -294,37 +400,44 @@ angular.module('crossbits.controllers', [])
         });
     };
 
+
     $scope.delete = function() {
-        $scope.confirmPopup('Delete this board?', 'Keep', 'Delete', function(result) {
-            if (result) {
-                Game.deleteCurrentBoard();
-                $ionicHistory.goBack(-2);
-            }
-        });
+        $scope.confirmPopup('Delete this board?', 'Keep', 'Delete',
+            function(result) {
+                if (result) {
+                    Game.deleteCurrentBoard();
+                    $ionicHistory.goBack(-2);
+                }
+            });
     };
+
 
     $scope.canUndo = function() {
         return Game.undoData().canUndo();
     };
 
+
     $scope.canRedo = function() {
         return Game.undoData().canRedo();
     };
 
+
     $scope.clear = function() {
-        $scope.confirmPopup('Clear this board?', 'No', 'Yes', function(result) {
-            if (result) {
-                Game.resetBoard($scope.boardData[0].length, $scope.boardData.length);
-            }
-        });
+        $scope.confirmPopup('Clear this board?', 'No', 'Yes',
+            function(result) {
+                if (result) {
+                    Game.resetBoard($scope.boardData[0].length, $scope.boardData.length);
+                }
+            });
     };
+
 
     $scope.undo = function() {
         Game.undoData().undo();
     };
 
+
     $scope.redo = function() {
         Game.undoData().redo();
     };
-
 });

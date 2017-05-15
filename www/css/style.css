@@ -1,39 +1,90 @@
 /* Empty. Add your own CSS if you like */
 
-.scroll {
+.pane,
+#board>.line>.cell.hidden-cell {
+    background-color: #026;
 }
-.pane {
-    background-color: #666;
+#boardlist .padded-slide-page,
+.range-block,
+#hintPad .pad {
+    background-color: #25B;
 }
-.row-center-content {
-    text-align: center;
+num-picker > .overlay {
+    background: linear-gradient(
+                    rgba(34,85,187,1) 10%,
+                    rgba(34,85,187,0) 40%,
+                    rgba(34,85,187,0) 60%,
+                    rgba(34,85,187,1) 90%);
 }
+#boardlist .padded-slide-title,
+.range-block .range-block-content,
+.slider-pager .slider-pager-page,
+#hintPad .line {
+    color: #58E;
+}
+
+#board>.line>.cell {
+    border-color: #025;
+    background-color: #248;
+    color: #47A;
+}
+#board>.line>.cell.on {
+    background-color: #FFF;
+}
+#board>.line>.cell.off {
+    background-color: #025;
+}
+#board>.line>.cell.hint-cell {
+    background-color: #137;
+}
+#board>.line>.cell.hint-cell.focus {
+    background-color: #46E;
+    color: #ADF;
+}
+#board>.line>.cell.hint-cell.match {
+    color: #FFF;
+    text-shadow: 0 0 10px #FFF;
+}
+
+
+#mainmenu .item-content,
+button,
+num-picker .num {
+    color: #ADF;
+}
+button:disabled {
+    color: #24A;
+}
+.button.button-dark {
+    border-color: #234;
+    background-color: #345;
+}
+.button.button-assertive {
+    border-color: #D13;
+    background-color: #E46;
+}
+.popup-dark .popup {
+    background-color: #9BE;
+}
+
+
 .padding {
     padding: 40px;
 }
-.range {
-    background: none;
-    border: none;
-}
-.range input::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 25%;
-}
-.range input::-webkit-slider-thumb:before {
-    top: 8px;
-    height: 5px;
-}
 ion-footer-bar {
-    opacity: 0.5;
+    pointer-events: none;
 }
+ion-footer-bar button,
+.backdrop.active {
+    pointer-events: auto;
+}
+
 #mainmenu .item, #mainmenu .item-content {
     background: none;
     border: none;
     text-align: center;
     padding-left: 0;
     padding-right: 0;
-    color: #999;
     font-size: x-large;
     cursor: pointer;
 }
@@ -50,17 +101,13 @@ ion-footer-bar {
     display: flex;
     flex-direction: row;
 }
-#board>.line>.cell
-{
+#board>.line>.cell {
     width: 25px;
     height: 25px;
-    background-color: #999;
-    border: 0 solid #666;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
+    border-style: solid;
+    border-width: 0 1px 1px 0;
     box-sizing: content-box;
     text-align: center;
-    color: #999;
     font-size: 12pt;
     line-height: 18pt;
     cursor: pointer;
@@ -71,30 +118,14 @@ ion-footer-bar {
 #board>.line>div.cell:nth-of-type(5n) {
     border-right-width: 2px;
 }
-#board>.line>.cell.on {
-    background-color: #fff;
-}
-#board>.line>.cell.off {
-    background-color: #777;
-}
-#board>.line>.cell.hint-cell {
-    background-color: #555;
-}
-#board>.line>.cell.hint-cell.match {
-    color: #fff;
-    text-shadow: 0 0 10px #fff;
-}
-#board>.line>.cell.hidden-cell {
-    background-color: #666;
-    cursor: default;
-}
+
+
 #boardlist .slider-pager {
     bottom: 0;
 }
 #boardlist .padded-slide-page {
     display: flex;
     align-items: center;
-    background: #999;
     height: 260px;
     margin: 20px 60px;
     cursor: pointer;
@@ -104,7 +135,6 @@ ion-footer-bar {
     position: relative;
     width: 200px;
     height: 200px;
-    background-color: #999;
     margin: auto;
 }
 .range-block .range-block-content {
@@ -112,47 +142,105 @@ ion-footer-bar {
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 .padded-slide-title,
-.range-block .range-block-content .range-block-title {
+.range-block .range-block-content,
+#hintPad .line {
     width: 100%;
     text-align: center;
     font-size: 4em;
     font-family: "Futura-CondensedMedium";
-    color: #666;
-}
-.range-block .range {
-    position: absolute;
-    padding: 0;
-    width: 100%;
-}
-.range-block .range-vertical {
-    transform: rotate(-90deg);
-    transform-origin: left bottom;
-    bottom: 0;
-}
-.range-block .range-horizontal {
-    bottom: -53px;
-}
-.range-block .range .button-icon.icon::before {
-    font-size: 22px;
-    margin-top: 3px;
 }
 
-
-.range-block .range-lock {
-    position: absolute;
-    width: 53px;
-    height: 53px;
-    left: -53px;
-}
-.popup-dark .popup {
-    background-color: #ccc;
-}
 .center-child {
     display: flex;
 }
-.center-child>* {
+.center-child > * {
     flex: 1;
     align-self: center;
+}
+num-picker {
+    position: relative;
+    height: 3em;
+    overflow: hidden;
+}
+num-picker > ion-scroll {
+    height: 100%;
+    /*margin-top: 0 !important;*/
+}
+num-picker .num {
+    text-align: right;
+    height: 1em;
+    line-height: 1em;
+    padding: 0 .1em;
+    cursor: pointer;
+}
+num-picker > .overlay {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.modal-backdrop-bg {
+    background-color: black;
+    opacity: .25;
+}
+
+#hintPad {
+    left: 50%;
+    top: 50%;
+    width: 250px;
+    margin-left: -125px;
+    min-height: 250px;
+    margin-top: -125px;
+    border-radius: 125px;
+    background-color: transparent;
+}
+#hintPad .pad {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+}
+#hintPad .line {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+#hintPad.active.fade-in {
+    animation-name: fadeIn;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+}
+#hintPad.ng-leave-active.fade-in {
+    animation-name: fadeOut;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+}
+@keyframes fadeIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+@keyframes fadeOut {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.8);
+        opacity: 0;
+    }
 }

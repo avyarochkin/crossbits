@@ -1,7 +1,7 @@
 <ion-view>
     <ion-content scroll="false" has-bouncing="false">
-        <ion-scroll id="boardscroll" delegate-handle="boardScroll" direction="xy" locking="false" scrollbar-x="false" scrollbar-y="false" has-bouncing="false" zooming="true"
-                min-zoom="0.5" max-zoom="1.5" class="center-child">
+        <ion-scroll id="boardscroll" delegate-handle="boardScroll" direction="xy" locking="false" scrollbar-x="false" scrollbar-y="false"
+                has-bouncing="false" zooming="true" min-zoom="0.5" max-zoom="1.5">
             <div id="board"
                     ng-style="{
                         width: boardSize.x+'px',
@@ -19,7 +19,10 @@
                     <!-- top hints of the current line -->
                     <div class="cell hint-cell" kind="tophint" x="{{$index}}" y="{{$parent.$index}}"
                             ng-repeat="x in columnHints.col"
-                            ng-class="{ 'match': columnHints.matching[$index] }">
+                            ng-class="{
+                                match: columnHints.matching[$index],
+                                focus: hintPad.at({{$index}}, {{$parent.$index}}, 'T')
+                            }">
                         {{columnHints.getHint($index, $parent.$index, 'T')}}
                     </div>
                 </span>
@@ -31,20 +34,29 @@
                     <!-- left hints of the current line -->
                     <span class="cell hint-cell" kind="lefthint" x="{{$index}}" y="{{$parent.$index}}"
                             ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index"
-                            ng-class="{ 'match': rowHints.matching[$parent.$index] }">
+                            ng-class="{
+                                match: rowHints.matching[$parent.$index],
+                                focus: hintPad.at({{$index}}, {{$parent.$index}}, 'L')
+                            }">
                         {{rowHints.getHint($parent.$index, $index, 'L')}}
                     </span>
 
                     <!-- board cells of the current line -->
                     <div class="cell" kind="data" x="{{$index}}" y="{{$parent.$index}}"
                             ng-repeat="x in y"
-                            ng-class="{ on: x.value===1, off: x.value===0 }">
+                            ng-class="{
+                                on:  x.value===1,
+                                off: !x.value
+                            }">
                     </div>
 
                     <!-- right hints of the current line -->
                     <span class="cell hint-cell" kind="righthint" x="{{$index}}" y="{{$parent.$index}}"
                             ng-repeat="x in rowHints.maxRow | limitTo: rowHints.getMaxX() track by $index"
-                            ng-class="{ 'match': rowHints.matching[$parent.$index] }">
+                            ng-class="{
+                                match: rowHints.matching[$parent.$index],
+                                focus: hintPad.at({{$index}}, {{$parent.$index}}, 'R')
+                            }">
                         {{rowHints.getHint($parent.$index, $index, 'R')}}
                     </span>
                 </div>
@@ -61,7 +73,10 @@
                     <!-- bottom hints of the current line -->
                     <div class="cell hint-cell" kind="bottomhint" x="{{$index}}" y="{{$parent.$index}}"
                             ng-repeat="x in columnHints.col"
-                            ng-class="{ 'match': columnHints.matching[$index] }">
+                            ng-class="{
+                                match: columnHints.matching[$index],
+                                focus: hintPad.at({{$index}}, {{$parent.$index}}, 'B')
+                            }">
                         {{columnHints.getHint($index, $parent.$index, 'B')}}
                     </div>
                 </span>

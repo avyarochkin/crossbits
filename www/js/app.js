@@ -1,8 +1,12 @@
-angular.module('crossbits', ['ionic', 'ui.router', 'ngCordova', 'ngIOS9UIWebViewPatch', 'crossbits.controllers', 'crossbits.services'])
-
-.run(function($cordovaStatusbar) {
-    //$cordovaStatusBar.hide();
-})
+angular.module('crossbits', [
+    'ionic',
+    'ui.router',
+    'ngCordova',
+    'ngIOS9UIWebViewPatch',
+    'crossbits.directives',
+    'crossbits.controllers',
+    'crossbits.services'
+])
 
 .config(function($stateProvider, $urlRouterProvider) {
 

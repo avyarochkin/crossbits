@@ -1,51 +1,23 @@
 <ion-view title="Board Size">
     <ion-content scroll="false" class="row">
+
         <div class="range-block">
-
             <div class="range-block-content">
-                <div class="range-block-title">{{size.x()}}&times;{{size.y()}}</div>
+                <num-picker value="size.x" min="size.minX" max="size.maxX"></num-picker>
+                <div>&times;</div>
+                <num-picker value="size.y" min="size.minY" max="size.maxY"></num-picker>
             </div>
-
-            <div class="range range-vertical range-light">
-                <button class="button button-dark button-icon icon ion-arrow-left-b"
-                        ng-click="size.incY(-1)"
-                        ng-disabled="!size.canIncY(-1)"></button>
-                <input type="range" name="y" min="{{size.minY}}" max="{{size.maxY}}" step="5"
-                        ng-model="size.y"
-                        ng-model-options="{ getterSetter: true }">
-                <button class="button button-dark button-icon icon ion-arrow-right-b"
-                        ng-click="size.incY(+1)"
-                        ng-disabled="!size.canIncY(+1)"></button>
-            </div>
-
-            <div class="range range-horizontal range-light">
-                <button class="button button-dark button-icon icon ion-arrow-left-b"
-                        ng-click="size.incX(-1)"
-                        ng-disabled="!size.canIncX(-1)"></button>
-                <input type="range" name="x" min="{{size.minX}}" max="{{size.maxX}}" step="5"
-                        ng-model="size.x"
-                        ng-model-options="{ getterSetter: true }">
-                <button class="button button-dark button-icon icon ion-arrow-right-b"
-                        ng-click="size.incX(+1)"
-                        ng-disabled="!size.canIncX(+1)"></button>
-            </div>
-
-            <button class="range-lock button button-dark button-icon icon"
-                    ng-class="{'ion-locked': size.locked, 'ion-unlocked': !size.locked}"
-                    ng-click="size.toggleLocked()">
-            </button>
-
         </div>
     </ion-content>
 
     <ion-footer-bar class="bar-clear">
         <div class="buttons">
-            <a class="button button-icon"
-                    ng-click="$ionicGoBack()">BACK</a>
+            <button class="button button-icon"
+                    ng-click="$ionicGoBack()">BACK</button>
         </div>
         <div class="buttons pull-right">
-            <a class="button button-icon"
-                    ng-click="editBoard()">NEXT</a>
+            <button class="button button-icon"
+                    ng-click="editBoard()">NEXT</button>
         </div>
     </ion-footer-bar>
 </ion-view>

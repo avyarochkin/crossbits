@@ -36,15 +36,50 @@ angular.module('crossbits.services', [])
             }
         } while (board);
     };
+    function getStaticBoards() {
+        return staticBoards.map(function(board) {
+            var boardData = [];
+            var width = board.columnHintData.length;
+            var height = board.rowHintData.length;
+
+            for (var y = 0; y < height; y++) {
+                boardData.push(new Array());
+                for (var x = 0; x < width; x++) {
+                    boardData[y].push({value: CELL_NIL});
+                }
+            }
+
+            return {
+                boardData: boardData,
+                columnHints: {
+                    col: board.columnHintData.map(function(col) {
+                        return col.map(function(value) {
+                            return { hint: value };
+                        });
+                    })
+                },
+                rowHints: {
+                    row: board.rowHintData.map(function(row) {
+                        return row.map(function(value) {
+                            return { hint: value };
+                        });
+                    })
+                },
+                static: true
+            };
+        });
+    };
     // initial load
     loadAllBoards();
+    // append static boards to saved boards
+    Array.prototype.push.apply(savedBoards, getStaticBoards());
 
     // todo should go to controller
     function setBoardSize() {
         var width = boardData[0].length, height = boardData.length;
         boardSize.x = width * 26 + Math.floor(width / 5) + rowHints.getMaxX() * 26 * 2;
         boardSize.y = height * 26 + Math.floor(height / 5) + columnHints.getMaxY() * 26 * 2;
-        console.log('board size '+boardSize.x+':'+boardSize.y);
+        // console.log('board size '+boardSize.x+':'+boardSize.y);
     };
 
     function setBoardData(y, x, value) {
@@ -69,7 +104,7 @@ angular.module('crossbits.services', [])
         },
         getMaxY: function() {
             var maxY = Math.floor((boardData.length + 1) / 2);
-            return Math.min(this.getLongestColLength() + ((boardStatus===STATUS_SETUP)?1:0), maxY);
+            return Math.min(this.getLongestColLength() + ((boardStatus === STATUS_SETUP) ? 1 : 0), maxY);
         },
         getLongestColLength: function() {
             return this.col.reduce(function(a, b) {
@@ -77,22 +112,35 @@ angular.module('crossbits.services', [])
             }, 0);
         },
         setHint: function(x, y, side, value) {
-            if (value) {
-                if (side === SIDE_TOP) {
-                    y -= this.getMaxY() - this.col[x].length;
-                    if (y < 0) {
-                        this.col[x].splice(0, 0, {hint: 0});
-                        y = 0;
-                    }
-                } else {
-                    if (y >= this.col[x].length) {
-                        this.col[x].push({hint: 0});
-                        y = this.col[x].length-1;
-                    }
+            var result = {x: x, y: y};
+            var last = false;
+
+            if (side === SIDE_TOP) {
+                y -= this.getMaxY() - this.col[x].length;
+                if (y < 0) {
+                    this.col[x].splice(0, 0, {hint: 0});
+                    y = 0;
                 }
-                this.col[x][y].hint = parseInt(value);
-                setBoardSize();
+                last = (!y);
+                result.y = y + this.getMaxY() - this.col[x].length;
+            } else {
+                if (y >= this.col[x].length) {
+                    this.col[x].push({hint: 0});
+                    y = this.col[x].length-1;
+                }
+                last = (y === this.col[x].length-1);
+                result.y = y;
             }
+
+            if (value) {
+                this.col[x][y].hint = parseInt(value);
+                console.log('columnHints[' + x + ',' + y + ']=' + this.col[x][y].hint);
+            } else if (last) {
+                this.col[x].splice(y, 1);
+            }
+            setBoardSize();
+
+            return result;
         },
         checkCol: function(x) {
             var chainLength = 0, hintIndex = 0, match = true;
@@ -264,7 +312,7 @@ angular.module('crossbits.services', [])
         },
         getMaxX: function() {
             var maxX = Math.floor((boardData[0].length + 1) / 2);
-            return Math.min(this.getLongestRowLength() + ((boardStatus===STATUS_SETUP)?1:0), maxX);
+            return Math.min(this.getLongestRowLength() + ((boardStatus === STATUS_SETUP) ? 1 : 0), maxX);
         },
         getLongestRowLength: function() {
             return this.row.reduce(function(a, b) {
@@ -272,22 +320,35 @@ angular.module('crossbits.services', [])
             }, 0);
         },
         setHint: function(y, x, side, value) {
-            if (value) {
-                if (side === SIDE_LEFT) {
-                    x -= this.getMaxX() - this.row[y].length;
-                    if (x < 0) {
-                        this.row[y].splice(0, 0, {hint: 0});
-                        x = 0;
-                    }
-                } else {
-                    if (x >= this.row[y].length) {
-                        this.row[y].push({hint: 0});
-                        x = this.row[y].length-1;
-                    }
+            var result = {x: x, y: y};
+            var last = false;
+
+            if (side === SIDE_LEFT) {
+                x -= this.getMaxX() - this.row[y].length;
+                if (x < 0) {
+                    this.row[y].splice(0, 0, {hint: 0});
+                    x = 0;
                 }
-                this.row[y][x].hint = parseInt(value);
-                setBoardSize();
+                last = (!x);
+                result.x = x + this.getMaxX() - this.row[y].length;
+            } else {
+                if (x >= this.row[y].length) {
+                    this.row[y].push({hint: 0});
+                    x = this.row[y].length-1;
+                }
+                last = (x === this.row[y].length-1);
+                result.x = x;
             }
+
+            if (value) {
+                this.row[y][x].hint = parseInt(value);
+                console.log('rowHints[' + x + ',' + y + ']=' + this.row[y][x].hint);
+            } else if (last) {
+                this.row[y].splice(x, 1);
+            }
+            setBoardSize();
+
+            return result;
         },
         checkRow: function(y) {
             var chainLength = 0, hintIndex = 0, match = true;
@@ -566,8 +627,10 @@ angular.module('crossbits.services', [])
             }
         },
         deleteCurrentBoard: function() {
-            for (var i = boardIndex; i < savedBoards.length-1; i++) {
-                LocalStorage.setObject(BOARDKEY.concat(i), savedBoards[i+1]);
+            for (var i = boardIndex + 1; i < savedBoards.length; i++) {
+                if (!savedBoards[i].static) {
+                    LocalStorage.setObject(BOARDKEY.concat(i-1), savedBoards[i]);
+                }
             }
             LocalStorage.delete(BOARDKEY.concat(savedBoards.length-1));
             savedBoards.splice(boardIndex, 1);
